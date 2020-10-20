@@ -9,10 +9,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/AlexAkulov/statsd-ha-proxy/server"
-	"github.com/AlexAkulov/statsd-ha-proxy/upstreams"
 	"github.com/go-kit/kit/metrics/graphite"
 	"github.com/op/go-logging"
+	"github.com/skbkontur/statsd-ha-proxy/server"
+	"github.com/skbkontur/statsd-ha-proxy/upstreams"
 	"github.com/spf13/pflag"
 )
 
