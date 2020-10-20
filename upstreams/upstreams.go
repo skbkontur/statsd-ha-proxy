@@ -18,7 +18,7 @@ type backend struct {
 	statsActive    *graphite.Counter
 	statsSentBytes *graphite.Counter
 
-	conn     *net.TCPConn
+	conn     net.Conn
 	server   string
 	timeout  time.Duration
 	uptime   int64
@@ -83,6 +83,7 @@ func (u *Upstream) sendData() {
 	for line := range u.Channel {
 		for {
 			if u.activeBackend.conn != nil {
+				u.activeBackend.conn.SetWriteDeadline(time.Now().Add(u.activeBackend.timeout))
 				n, err := u.activeBackend.conn.Write(append(line, []byte("\n")...))
 				if err == nil {
 					u.activeBackend.statsSentBytes.Add(float64(n))
@@ -128,19 +129,13 @@ func (u *Upstream) watchDog() {
 }
 
 func (b *backend) Connect() error {
-	var (
-		addr *net.TCPAddr
-		err  error
-	)
+	var err error
 	if b.conn == nil {
-		if addr, err = net.ResolveTCPAddr("tcp", b.server); err != nil {
+		if b.conn, err = net.DialTimeout("tcp", b.server, b.timeout); err != nil {
 			return err
 		}
-		if b.conn, err = net.DialTCP("tcp", nil, addr); err != nil {
-			return err
-		}
-		b.conn.SetNoDelay(false)
-		b.conn.SetKeepAlive(true)
+		b.conn.(*net.TCPConn).SetNoDelay(false)
+		b.conn.(*net.TCPConn).SetKeepAlive(true)
 
 		b.uptime = time.Now().Unix()
 	}
