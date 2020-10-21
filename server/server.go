@@ -41,17 +41,17 @@ type Server struct {
 func (s *Server) Start() error {
 	log = s.Log
 
+	s.statsTCPBytes = s.Stats.NewCounter("incoming.tcpBytes")
+	s.statsUDPBytes = s.Stats.NewCounter("incoming.udpBytes")
+	s.statsTCPCounter = s.Stats.NewCounter("incoming.tcpCounter")
+	s.statsUDPCounter = s.Stats.NewCounter("incoming.udpCounter")
+
 	if err := s.startUDP(); err != nil {
 		return err
 	}
 	if err := s.startTCP(); err != nil {
 		return err
 	}
-
-	s.statsTCPBytes = s.Stats.NewCounter("incoming.tcpBytes")
-	s.statsUDPBytes = s.Stats.NewCounter("incoming.udpBytes")
-	s.statsTCPCounter = s.Stats.NewCounter("incoming.tcpCounter")
-	s.statsUDPCounter = s.Stats.NewCounter("incoming.udpCounter")
 
 	return nil
 }
